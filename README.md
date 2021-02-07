@@ -1,2 +1,2 @@
 # Mobile-Coursework
-A coursework for mobile developement in Kiyv Politechnical Institute. 3rd-year.
+A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
