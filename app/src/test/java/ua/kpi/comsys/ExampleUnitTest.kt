@@ -1,4 +1,4 @@
-package com.example.coursework8405
+package ua.kpi.comsys
 
 import org.junit.Test
 

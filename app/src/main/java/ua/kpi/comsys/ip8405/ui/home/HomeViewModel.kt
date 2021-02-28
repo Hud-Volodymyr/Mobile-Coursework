@@ -1,4 +1,4 @@
-package com.example.coursework8405.ui.home
+package ua.kpi.comsys.ip8405.ui.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

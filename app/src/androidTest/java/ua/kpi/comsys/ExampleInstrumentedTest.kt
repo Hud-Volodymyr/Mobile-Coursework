@@ -1,4 +1,4 @@
-package com.example.coursework8405
+package ua.kpi.comsys
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

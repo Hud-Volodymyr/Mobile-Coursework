@@ -7,18 +7,18 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.coursework8405.ui.home.HomeFragment"
+        android:name="ua.kpi.comsys.ip8405.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_navigation_home_to_navigation_dashboard"
-            app:destination="@id/navigation_dashboard" />
+            app:destination="@id/navigation_charts" />
     </fragment>
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.coursework8405.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" >
+        android:id="@+id/navigation_charts"
+        android:name="ua.kpi.comsys.ip8405.ui.chart.ChartFragment"
+        android:label="@string/title_charts"
+        tools:layout="@layout/fragment_charts" >
     </fragment>
 </navigation>
