@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -15,7 +14,6 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.*
 import com.google.android.material.button.MaterialButtonToggleGroup
 import kotlin.math.PI
-import kotlin.math.absoluteValue
 import kotlin.math.sin
 
 class ChartFragment : Fragment() {
@@ -88,18 +86,21 @@ class ChartFragment : Fragment() {
         colors.add(ContextCompat.getColor(requireContext(), R.color.sky_blue))
         pieSlice.add(PieEntry(10f, "Orange"))
         colors.add(ContextCompat.getColor(requireContext(), R.color.orange))
-        pieSlice.add(PieEntry(10f, "Red"))
-        colors.add(ContextCompat.getColor(requireContext(), R.color.red))
         pieSlice.add(PieEntry(80f, "Dark Blue"))
         colors.add(ContextCompat.getColor(requireContext(), R.color.dark_blue))
 
         val pieDataSet = PieDataSet(pieSlice, "Pie slices colors")
         pieDataSet.colors = colors
-        pieDataSet.valueTextSize = 15f
+        pieDataSet.valueTextSize = 8f
         pieDataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.white)
+        pieDataSet.selectionShift = 10f
 
         val pieData = PieData(pieDataSet)
         pieChart.description.isEnabled = false;
         pieChart.data = pieData
+        pieChart.setUsePercentValues(true)
+        pieChart.isRotationEnabled = false
+        pieChart.isDrawHoleEnabled = false;
+        pieChart.setDrawEntryLabels(false)
     }
 }
