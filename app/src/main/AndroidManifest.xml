@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.coursework8405">
+    package="ua.kpi.comsys.ip8405">
 
     <application
         android:allowBackup="true"

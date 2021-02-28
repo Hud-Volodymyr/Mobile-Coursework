@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.example.coursework8405"
+        applicationId "ua.kpi.comsys.ip8405"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1

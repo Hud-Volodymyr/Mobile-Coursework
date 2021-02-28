@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.coursework8405.R
+import ua.kpi.comsys.ip8405.R
 
 class HomeFragment : Fragment() {
 
