@@ -12,4 +12,5 @@
     <color name="sky_blue">#87CEEB</color>
     <color name="orange">#FF8C00</color>
     <color name="dark_blue">#00008b</color>
+    <color name="slightly_grey">#d3d3d3</color>
 </resources>

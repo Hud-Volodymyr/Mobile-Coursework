@@ -11,4 +11,9 @@
         android:icon="@drawable/ic_chart"
         android:title="@string/title_charts" />
 
+    <item
+        android:id="@+id/navigation_books"
+        android:icon="@drawable/ic_chart"
+        android:title="@string/title_books" />
+
 </menu>

@@ -38,7 +38,7 @@
             android:id="@+id/lineChart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="70dp"></com.github.mikephil.charting.charts.LineChart>
+            android:layout_marginBottom="70dp" />
     </LinearLayout>
 
     <com.github.mikephil.charting.charts.PieChart
