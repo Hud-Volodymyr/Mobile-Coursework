@@ -30,11 +30,11 @@ A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
 
 <p align="center">
 <b>Приклад роботи додатка<b><br />
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_homepage_portait.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_piechart_landscape.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_piechart_portrait.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_sine_graph_landscape.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_sine_graph_portrait.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab3/images/main_vertical.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab3/images/books_vertical.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab3/images/boos_vertical_endOfList.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab3/images/books_horizontal.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab3/images/books_horizontal_endOfList.jpg?raw=true"/>
 </p>
   
 ----------------------------------------------------------------------------------------------------------------
