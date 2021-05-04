@@ -104,7 +104,7 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (booksList?.isEmpty() == true) return true
                 if (newText != null) {
-                    val filteredBookList = booksList?.filter { book -> book.title.toLowerCase().contains(newText) } as ArrayList<Book>
+                    val filteredBookList = booksList?.filter { book -> book.title.toLowerCase().contains(newText.toLowerCase()) } as ArrayList<Book>
                     model.bookAdapter.value?.books = filteredBookList
                     model.bookAdapter.value?.notifyDataSetChanged()
                     noItemsFound.isVisible = filteredBookList.size == 0
