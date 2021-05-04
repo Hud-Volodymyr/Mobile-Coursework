@@ -9,11 +9,11 @@ import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.nio.charset.Charset
 
-internal class BooksDataSource(private val filename: String, private val assetManager: AssetManager) {
+internal class BooksDataSource(private val assetManager: AssetManager, private val filename: String = BOOKS_LOCATION) {
     fun getBooks(): ArrayList<Book> {
         val books = assetManager.open(filename).bufferedReader(Charset.defaultCharset()).readText()
 
-        return Json.decodeFromString<BookData>(books).data
+        return Json.decodeFromString<BooksData>(books).data
     }
 
     fun getImage(book: Book): Drawable? {
@@ -24,6 +24,18 @@ internal class BooksDataSource(private val filename: String, private val assetMa
         }
     }
 
+    fun getBook(location: String): Book?  = try {
+        val book = assetManager.open("$location.txt").bufferedReader(Charset.defaultCharset()).readText()
+
+        Json.decodeFromString(book)
+    } catch (err: IOException) {
+        null
+    }
+
     @Serializable
-    private data class BookData(@SerialName("books") val data: ArrayList<Book>)
+    private data class BooksData(@SerialName("books") val data: ArrayList<Book>)
+
+    companion object {
+        private const val BOOKS_LOCATION = "BooksList.txt"
+    }
 }

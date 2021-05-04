@@ -11,7 +11,8 @@
         android:theme="@style/Theme.Coursework8405">
         <activity
             android:name="ua.kpi.comsys.ip8405.MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

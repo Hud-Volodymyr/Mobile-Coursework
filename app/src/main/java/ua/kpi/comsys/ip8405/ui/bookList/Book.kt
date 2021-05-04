@@ -16,6 +16,24 @@ internal data class Book(
     @SerialName("price")
     val price: String,
 
+    @SerialName("year")
+    val year: String = "Unknown year",
+
     @SerialName("image")
-    val image: String
+    val image: String,
+
+    @SerialName("desc")
+    val desc: String = "No description provided",
+
+    @SerialName("authors")
+    val authors: String = "No information about authors",
+
+    @SerialName("pages")
+    val pages: String = "No information about page count",
+
+    @SerialName("rating")
+    val rating: String = "No ratings available",
+
+    @SerialName("publisher")
+    val publisher: String = "No publisher info"
 )

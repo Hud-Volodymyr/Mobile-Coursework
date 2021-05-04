@@ -10,8 +10,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import ua.kpi.comsys.ip8405.R
 
-internal class BookAdapter(private val datasource: BooksDataSource): RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
-    private val books = datasource.getBooks()
+internal class BookAdapter(private val datasource: BooksDataSource, private val clickListener : BookClickListener): RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
+    var ds = datasource
+    var books = datasource.getBooks()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookAdapter.BookViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -20,8 +21,22 @@ internal class BookAdapter(private val datasource: BooksDataSource): RecyclerVie
     }
 
     override fun onBindViewHolder(holder: BookAdapter.BookViewHolder, position: Int) {
-        val image = datasource.getImage(books[position])
-        holder.bind(books[position], image)
+        val book = books[position]
+        val image = datasource.getImage(book)
+        holder.bind(book, image)
+        holder.itemView.setOnClickListener {
+            clickListener.onClick(book.isbn13)
+        }
+    }
+
+    fun addBook(book: Book) {
+        books.add(book)
+        notifyItemInserted(itemCount - 1)
+    }
+
+    fun removeBook(position: Int) {
+        books.removeAt(position)
+        notifyItemRemoved(position)
     }
 
     inner class BookViewHolder(view: View): RecyclerView.ViewHolder(view) {
@@ -43,4 +58,8 @@ internal class BookAdapter(private val datasource: BooksDataSource): RecyclerVie
     }
 
     override fun getItemCount(): Int = books.size
+
+    class BookClickListener(val clickListener: (isbn13: String) -> Unit) {
+        fun onClick(isbn13: String) = clickListener(isbn13)
+    }
 }
