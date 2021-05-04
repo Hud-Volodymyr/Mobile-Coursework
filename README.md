@@ -9,7 +9,7 @@ A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
 “КИЇВСЬКИЙ ПОЛІТЕХНІЧНИЙ ІНСТИТУТ ІМЕНІ ІГОРЯ СІКОРСЬКОГО”<br />
 Факультет інформатики та обчислювальної техніки<br />
 Кафедра обчислювальної техніки<br />
-Лабораторна робота №2<br />
+Лабораторна робота №4<br />
 з дисципліни<br />
 “Розроблення клієнтських додатків для мобільних платформ”<br />
 </p>
@@ -30,129 +30,146 @@ A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
 
 <p align="center">
 <b>Приклад роботи додатка<b><br />
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_homepage_portait.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_piechart_landscape.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_piechart_portrait.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_sine_graph_landscape.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab2/images/2_sine_graph_portrait.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/boos_vertical_endOfList.jpgraw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_vertical.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_not_found.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_info_vertical.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_info_horizontal.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_horizontal_endOfList.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_horizontal.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_create_vertical.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_create_horizontal.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/book_search.jpg?raw=true"/>
 </p>
   
 ----------------------------------------------------------------------------------------------------------------
 
 <p>
-<b>Приклад коду для для малювання графіків<b><br />
+<b>Приклад коду списку книг<b><br />
 </p>
   
 ``` kotlin
-package ua.kpi.comsys.ip8405.ui.chart
+package ua.kpi.comsys.ip8405.ui.bookList
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import android.widget.ImageButton
+import android.widget.SearchView
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import ia.kpi.comsys.ip8405.R
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.data.*
-import com.google.android.material.button.MaterialButtonToggleGroup
-import kotlin.math.PI
-import kotlin.math.sin
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.commit
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import ua.kpi.comsys.ip8405.R
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
-class ChartFragment : Fragment() {
+class SharedViewModel : ViewModel() {
+    internal val bookAdapter = MutableLiveData<BookAdapter?>()
+    val isbn13 = MutableLiveData<String>()
+    val parentFragmentManager = MutableLiveData<FragmentManager?>()
 
-    private lateinit var chartViewModel: ChartViewModel
+    internal fun setBookAdapter(newAdapter: BookAdapter?) {
+        bookAdapter.value = newAdapter
+    }
+
+    fun onBookClicked(newIsbn13 : String) {
+        isbn13.value = newIsbn13
+    }
+
+    fun setFragmentManager(fragmentManager: FragmentManager) {
+        parentFragmentManager.value = fragmentManager
+    }
+}
+
+
+class BookListFragment : Fragment(R.layout.book_list_fragment) {
+    private val model: SharedViewModel by activityViewModels()
+    private lateinit var noItemsFound: TextView
+    internal var booksList : ArrayList<Book>? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        chartViewModel =
-                ViewModelProvider(this).get(ChartViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_charts, container, false)
-        val graph = root.findViewById<LineChart>(R.id.lineChart)
-        val pieChart = root.findViewById<PieChart>(R.id.pieChart)
-        drawGraph(graph)
-        drawPiechart(pieChart)
-        if (pieChart.isVisible && graph.isVisible) pieChart.visibility = View.INVISIBLE
-        val button = root.findViewById<MaterialButtonToggleGroup>(R.id.toggleGroup)
-        button.addOnButtonCheckedListener { group, checkedId, isChecked ->
-            when {
-                checkedId == R.id.Graph && isChecked -> {
-                    group.uncheck(R.id.Piechart)
-                    graph.visibility = View.VISIBLE
-                    pieChart.visibility = View.INVISIBLE
-                }
-                checkedId == R.id.Piechart && isChecked -> {
-                    group.uncheck(R.id.Graph)
-                    graph.visibility = View.INVISIBLE
-                    pieChart.visibility = View.VISIBLE
-                }
+            savedInstanceState: Bundle?): View? {
+        retainInstance = true
+        if (model.parentFragmentManager.value == null) model.setFragmentManager(parentFragmentManager)
+        return inflater.inflate(R.layout.book_list_fragment, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val recyclerView = getView()?.findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView?.layoutManager = LinearLayoutManager(this.context)
+        if (model.bookAdapter.value == null) {
+            val bookList = BooksDataSource(requireActivity().assets)
+            val clickListener = BookAdapter.BookClickListener { isbn13: String ->
+                activity?.supportFragmentManager?.commit {
+                    model.onBookClicked(isbn13)
+                    replace(R.id.nav_host_fragment, AdditionalInfoFragment())
+                    addToBackStack(null)
+                } }
+            model.setBookAdapter(context?.let { BookAdapter(bookList, clickListener) })
+        }
+        recyclerView?.adapter = model.bookAdapter.value
+        booksList = model.bookAdapter.value?.books
+        noItemsFound = view.findViewById(R.id.not_found)!!
+        noItemsFound.isVisible = false
+        val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val adapter = recyclerView?.adapter as BookAdapter
+                val position = viewHolder.adapterPosition
+                val item = adapter.books[position]
+                adapter.removeBook(position)
+                booksList?.remove(item)
             }
         }
-
-        return root
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+        addFloatingBookActionClickListener(view)
+        addSearchListener(view)
     }
-    private fun drawGraph(graph: LineChart) {
-        val points = ArrayList<Entry>()
 
-        var i = (-2f * PI).toFloat()
-        do {
-            points.add(Entry(i, sin(i)))
-            i += 0.2f
-        } while((-2f * PI).toFloat() < i && i < (2f * PI).toFloat())
-        points.add(Entry((2f * PI).toFloat(), sin((2f * PI).toFloat())))
-        val line = LineDataSet(points, "y = sin(x)")
-        line.setDrawValues(false)
-        line.lineWidth = 3f
-        line.color = ContextCompat.getColor(requireContext(), R.color.black)
-        line.setDrawCircles(false)
-
-        graph.xAxis.labelRotationAngle = 0f
-        graph.axisLeft.axisMinimum = -2f
-        graph.axisLeft.axisMaximum = 2f
-        graph.axisRight.axisMinimum = -2f
-        graph.axisRight.axisMaximum = 2f
-
-        graph.data = LineData(line)
-        graph.xAxis.axisMinimum = (-3f * PI).toFloat()
-        graph.xAxis.axisMaximum = (3f * PI).toFloat()
-        graph.description.isEnabled = false;
+    private fun addFloatingBookActionClickListener(root: View) {
+        val addBookButton = root.findViewById<ImageButton>(R.id.book_creator_button)
+        addBookButton.setOnClickListener {
+            parentFragmentManager.commit {
+                replace(R.id.nav_host_fragment, AddBookFragment())
+                addToBackStack(null)
+            }
+        }
     }
-    private fun drawPiechart(pieChart: PieChart) {
-        val pieSlice = ArrayList<PieEntry>()
-        val colors = ArrayList<Int>()
-        pieSlice.add(PieEntry(5f, "Brown"))
-        colors.add(ContextCompat.getColor(requireContext(), R.color.brown))
-        pieSlice.add(PieEntry(5f, "Sky Blue"))
-        colors.add(ContextCompat.getColor(requireContext(), R.color.sky_blue))
-        pieSlice.add(PieEntry(10f, "Orange"))
-        colors.add(ContextCompat.getColor(requireContext(), R.color.orange))
-        pieSlice.add(PieEntry(80f, "Dark Blue"))
-        colors.add(ContextCompat.getColor(requireContext(), R.color.dark_blue))
 
-        val pieDataSet = PieDataSet(pieSlice, "Pie slices colors")
-        pieDataSet.colors = colors
-        pieDataSet.valueTextSize = 8f
-        pieDataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.white)
-        pieDataSet.selectionShift = 10f
-
-        val pieData = PieData(pieDataSet)
-        pieChart.description.isEnabled = false;
-        pieChart.data = pieData
-        pieChart.setUsePercentValues(true)
-        pieChart.isRotationEnabled = false
-        pieChart.isDrawHoleEnabled = false;
-        pieChart.setDrawEntryLabels(false)
+    private fun addSearchListener(root: View) {
+        val searchView = root.findViewById<SearchView>(R.id.searchBook)
+        val queryTextListener = object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (booksList?.isEmpty() == true) return true
+                if (newText != null) {
+                    val filteredBookList = booksList?.filter { book -> book.title.toLowerCase().contains(newText.toLowerCase()) } as ArrayList<Book>
+                    model.bookAdapter.value?.books = filteredBookList
+                    model.bookAdapter.value?.notifyDataSetChanged()
+                    noItemsFound.isVisible = filteredBookList.size == 0
+                }
+                return true
+            }
+        }
+        searchView.setOnQueryTextListener(queryTextListener)
     }
+}
 ```
 
 <p>
 <b>Висновок<b><br />
 </p>
 
-В даній лабораторній роботі ми навчилися малювати графіки на платформі андроїд за допомогою мови kotlin.
+В даній лабораторній роботі ми навчилися додавати функціонал до існуючого, а також працювати з створенням, видаленням та пошуком сутностей на платформі Android.
