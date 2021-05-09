@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.SearchView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -14,22 +16,63 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ua.kpi.comsys.ip8405.R
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
+import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class SharedViewModel : ViewModel() {
     internal val bookAdapter = MutableLiveData<BookAdapter?>()
     val isbn13 = MutableLiveData<String>()
     val parentFragmentManager = MutableLiveData<FragmentManager?>()
+    private val datasource = BooksDataSource()
+    val state = MutableLiveData(false)
+    internal val book = MutableLiveData<Result<Book, Exception>>()
+    internal val books = MutableLiveData<Result<List<Book>, Exception>>()
+    @ExperimentalSerializationApi
+    fun provideBooks(request: String?) {
+        state.value = true
+        if (request.isNullOrBlank()) {
+            books.postValue(Err(Exception("Please enter at least 3 symbols to start the search")))
+            state.value = false
+            return
+        }
 
-    internal fun setBookAdapter(newAdapter: BookAdapter?) {
-        bookAdapter.value = newAdapter
+        if (request.length < 3) {
+            books.postValue(Err(Exception("Please enter at least 3 symbols to start the search")))
+            state.value = false
+            return
+        }
+
+        if (request.contains(Regex("[^A-Za-z0-9 -'`]"))) {
+            books.postValue(Err(Exception("Illegal characters")))
+            state.value = false
+            return
+        }
+
+        viewModelScope.launch {
+            books.postValue(datasource.getBooks(request))
+            state.value = false
+        }
     }
 
-    fun onBookClicked(newIsbn13 : String) {
-        isbn13.value = newIsbn13
+    @ExperimentalSerializationApi
+    fun provideBook(isbn13: String) {
+        if (state.value == true) return
+        state.postValue(true)
+
+        viewModelScope.launch {
+            book.postValue(datasource.getBook(isbn13))
+            state.postValue(false)
+        }
     }
 
     fun setFragmentManager(fragmentManager: FragmentManager) {
@@ -41,7 +84,7 @@ class SharedViewModel : ViewModel() {
 class BookListFragment : Fragment(R.layout.book_list_fragment) {
     private val model: SharedViewModel by activityViewModels()
     private lateinit var noItemsFound: TextView
-    internal var booksList : ArrayList<Book>? = null
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -52,47 +95,55 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
         return inflater.inflate(R.layout.book_list_fragment, container, false)
     }
 
+    @ExperimentalSerializationApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val recyclerView = getView()?.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(this.context)
+        noItemsFound = view.findViewById(R.id.not_found)!!
+        progressBar = view.findViewById(R.id.progress_bar)!!
         if (model.bookAdapter.value == null) {
-            val bookList = BooksDataSource(requireActivity().assets)
-            val clickListener = BookAdapter.BookClickListener { isbn13: String ->
-                activity?.supportFragmentManager?.commit {
-                    model.onBookClicked(isbn13)
-                    replace(R.id.nav_host_fragment, AdditionalInfoFragment())
-                    addToBackStack(null)
-                } }
-            model.setBookAdapter(context?.let { BookAdapter(bookList, clickListener) })
+            model.bookAdapter.value = BookAdapter().apply {
+                setOnBookClickListener {
+                    model.book.value = null
+                    model.book.observe(viewLifecycleOwner, Observer@{ res ->
+                        if (res == null) return@Observer
+                        model.book.removeObservers(viewLifecycleOwner)
+                        res.onSuccess {
+                            val fragment = AdditionalInfoFragment().apply {
+                                val json = Json.encodeToString(it)
+                                arguments = bundleOf(AdditionalInfoFragment.BOOK_BUNDLE to json)
+                            }
+                            activity?.supportFragmentManager?.commit {
+                                replace(R.id.nav_host_fragment, fragment)
+                                addToBackStack(null)
+                            }
+                        }.onFailure { error ->
+                            Toast.makeText(context, error.message?: "Unknown error during retrieving book additional info", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                    model.provideBook(it.isbn13)
+                }
+            }
         }
         recyclerView?.adapter = model.bookAdapter.value
-        booksList = model.bookAdapter.value?.books
-        noItemsFound = view.findViewById(R.id.not_found)!!
-        noItemsFound.isVisible = false
-        val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val adapter = recyclerView?.adapter as BookAdapter
-                val position = viewHolder.adapterPosition
-                val item = adapter.books[position]
-                adapter.removeBook(position)
-                booksList?.remove(item)
-            }
-        }
-        val itemTouchHelper = ItemTouchHelper(swipeHandler)
-        itemTouchHelper.attachToRecyclerView(recyclerView)
-        addFloatingBookActionClickListener(view)
         addSearchListener(view)
-    }
-
-    private fun addFloatingBookActionClickListener(root: View) {
-        val addBookButton = root.findViewById<ImageButton>(R.id.book_creator_button)
-        addBookButton.setOnClickListener {
-            parentFragmentManager.commit {
-                replace(R.id.nav_host_fragment, AddBookFragment())
-                addToBackStack(null)
+        progressBar.isIndeterminate = true
+        model.state.observe(viewLifecycleOwner, {
+            progressBar.isVisible = it
+        })
+        model.books.observe(viewLifecycleOwner, {
+            it.onSuccess { books ->
+                recyclerView?.isVisible = true
+                noItemsFound.isVisible = false
+                model.bookAdapter.value!!.update(books)
             }
-        }
+            it.onFailure { error ->
+                recyclerView?.isVisible = false
+                noItemsFound.isVisible = true
+                noItemsFound.text = error.message
+            }
+        })
     }
 
     private fun addSearchListener(root: View) {
@@ -102,13 +153,7 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
                 return true
             }
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (booksList?.isEmpty() == true) return true
-                if (newText != null) {
-                    val filteredBookList = booksList?.filter { book -> book.title.toLowerCase().contains(newText.toLowerCase()) } as ArrayList<Book>
-                    model.bookAdapter.value?.books = filteredBookList
-                    model.bookAdapter.value?.notifyDataSetChanged()
-                    noItemsFound.isVisible = filteredBookList.size == 0
-                }
+                model.provideBooks(newText)
                 return true
             }
         }

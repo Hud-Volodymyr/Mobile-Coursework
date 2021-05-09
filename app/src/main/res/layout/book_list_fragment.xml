@@ -7,6 +7,18 @@
     android:layout_height="match_parent"
     android:layout_marginBottom="55dp">
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchBook"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:progress="20"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"/>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -16,7 +28,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchBook"
+        app:layout_constraintTop_toBottomOf="@+id/progress_bar"
         app:layout_constraintVertical_bias="0.0" />
 
     <SearchView
@@ -24,15 +36,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="MissingConstraints" />
-
-    <ImageButton
-        android:id="@+id/book_creator_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layoutDirection="inherit"
-        app:layout_constraintEnd_toEndOf="@+id/searchBook"
-        app:srcCompat="@android:drawable/ic_input_add"
         tools:ignore="MissingConstraints" />
 
     <TextView
