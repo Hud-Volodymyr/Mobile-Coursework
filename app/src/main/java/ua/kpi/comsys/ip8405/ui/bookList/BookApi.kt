@@ -17,7 +17,7 @@ internal interface BookApi {
 }
 
 @ExperimentalSerializationApi
-inline fun <reified T> getApi(): T {
+inline fun <reified T> getFilmApi(): T {
 
     val json = Json {
         ignoreUnknownKeys = true

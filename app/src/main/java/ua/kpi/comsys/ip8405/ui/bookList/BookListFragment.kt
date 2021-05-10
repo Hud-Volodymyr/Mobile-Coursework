@@ -1,4 +1,4 @@
-package ua.kpi.comsys.ip8405.ui.bookList
+    package ua.kpi.comsys.ip8405.ui.bookList
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,11 +12,8 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.commit
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import ua.kpi.comsys.ip8405.R
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -82,7 +79,7 @@ class SharedViewModel : ViewModel() {
 
 
 class BookListFragment : Fragment(R.layout.book_list_fragment) {
-    private val model: SharedViewModel by activityViewModels()
+    private lateinit var model: SharedViewModel
     private lateinit var noItemsFound: TextView
     private lateinit var progressBar: ProgressBar
 
@@ -90,7 +87,7 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View? {
-        retainInstance = true
+        model = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         if (model.parentFragmentManager.value == null) model.setFragmentManager(parentFragmentManager)
         return inflater.inflate(R.layout.book_list_fragment, container, false)
     }
@@ -115,8 +112,8 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
                                 arguments = bundleOf(AdditionalInfoFragment.BOOK_BUNDLE to json)
                             }
                             activity?.supportFragmentManager?.commit {
-                                replace(R.id.nav_host_fragment, fragment)
-                                addToBackStack(null)
+                                replace(R.id.container, fragment)
+                                addToBackStack(fragment::class.simpleName)
                             }
                         }.onFailure { error ->
                             Toast.makeText(context, error.message?: "Unknown error during retrieving book additional info", Toast.LENGTH_SHORT).show()
@@ -129,10 +126,10 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
         recyclerView?.adapter = model.bookAdapter.value
         addSearchListener(view)
         progressBar.isIndeterminate = true
-        model.state.observe(viewLifecycleOwner, {
+        model.state.observe(viewLifecycleOwner) {
             progressBar.isVisible = it
-        })
-        model.books.observe(viewLifecycleOwner, {
+        }
+        model.books.observe(viewLifecycleOwner) {
             it.onSuccess { books ->
                 recyclerView?.isVisible = true
                 noItemsFound.isVisible = false
@@ -143,7 +140,7 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
                 noItemsFound.isVisible = true
                 noItemsFound.text = error.message
             }
-        })
+        }
     }
 
     private fun addSearchListener(root: View) {

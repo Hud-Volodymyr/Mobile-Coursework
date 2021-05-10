@@ -1,28 +1,30 @@
 package ua.kpi.comsys.ip8405
 
+import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import ua.kpi.comsys.ip8405.R
 
-class MainActivity : AppCompatActivity() {
+abstract class MainActivity : AppCompatActivity() {
+    private val resultListeners = mutableMapOf<Int, (Int, Intent?) -> Unit>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val navView: BottomNavigationView = findViewById(R.id.nav_view)
+    }
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.navigation_home, R.id.navigation_charts, R.id.navigation_books, R.id.navigation_gallery))
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+    var onBackPressedListener: (() -> Unit)? = null
+
+    override fun onBackPressed() {
+        onBackPressedListener?.invoke() ?: finish()
+    }
+
+    fun startActivityForResult(intent: Intent, requestCode: Int, cb: (Int, Intent?) -> Unit) {
+        resultListeners[requestCode] = cb
+        startActivityForResult(intent, requestCode)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        resultListeners[requestCode]?.invoke(resultCode, data)
     }
 }

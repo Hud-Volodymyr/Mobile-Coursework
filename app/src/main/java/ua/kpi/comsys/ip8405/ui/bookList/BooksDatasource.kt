@@ -10,7 +10,7 @@ import com.github.michaelbull.result.Ok
 
 internal class BooksDataSource {
     @ExperimentalSerializationApi
-    private val bookApi = getApi<BookApi>()
+    private val bookApi = getFilmApi<BookApi>()
 
     @ExperimentalSerializationApi
     suspend fun getBooks(request: String?) : Result<List<Book>, Exception> {

@@ -8,16 +8,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
+import kotlinx.serialization.ExperimentalSerializationApi
 import ua.kpi.comsys.ip8405.R
 
 class GalleryFragment: Fragment(R.layout.gallery_fragment) {
     private lateinit var galleryViewModel: GalleryViewModel
+    private lateinit var progressBar: ProgressBar
+    private lateinit var noItemsFound: TextView
 
     private fun createGalleryAdapter() {
-        galleryViewModel.setGalleryAdapter(context?.let { GalleryAdapter(mutableListOf<Uri>()) })
+        galleryViewModel.setGalleryAdapter(context?.let { GalleryAdapter(handler = galleryViewModel.picasso) })
     }
 
     private fun addFloatingImageActionClickListener(root: View) {
@@ -36,7 +46,7 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == 1) {
-            galleryViewModel.galleryAdapter.value?.addImage(data?.data)
+            galleryViewModel.galleryAdapter.value?.addImage(Image(data?.data.toString()))
         }
     }
 
@@ -47,10 +57,13 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
         return inflater.inflate(R.layout.gallery_fragment, container, false)
     }
 
+    @ExperimentalSerializationApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val root = getView()
         val recyclerView = root?.findViewById<RecyclerView>(R.id.galleryRecyclerView)
+        progressBar = view.findViewById(R.id.progress_bar)!!
+        noItemsFound = view.findViewById(R.id.not_found)!!
         recyclerView?.layoutManager = GalleryLayoutManager()
         if (galleryViewModel.galleryAdapter.value == null) {
             createGalleryAdapter()
@@ -58,6 +71,24 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
         recyclerView?.adapter = galleryViewModel.galleryAdapter.value
         if (root != null) {
             addFloatingImageActionClickListener(root)
+        }
+
+        progressBar.isIndeterminate = true
+        galleryViewModel.state.observe(viewLifecycleOwner) {
+            progressBar.isVisible = it
+            noItemsFound.isVisible = it
+        }
+
+        galleryViewModel.imageList.observe(viewLifecycleOwner) {
+            it.onSuccess { gallery ->
+                galleryViewModel.galleryAdapter.value?.update(gallery)
+            }.onFailure { error ->
+                noItemsFound.text = error.message
+            }
+        }
+
+        if (galleryViewModel.imageList.value !is Ok) {
+            galleryViewModel.provideImages()
         }
     }
 }
