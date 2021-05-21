@@ -3,6 +3,14 @@
     <string name="title_home">Home</string>
     <string name="title_charts">Charts</string>
     <string name="title_books">Books</string>
+    <string name="title_images">Images</string>
     <string name="title_piechart">Piechart</string>
     <string name="title_graph">Graph</string>
+    <string name="not_found">Books not found</string>
+    <string name="gallery_not_found">Images not found</string>
+    <string name="add_book">Provide info about new book</string>
+    <string name="title">Book title</string>
+    <string name="subtitle">Book subtitle</string>
+    <string name="price">Book price</string>
+    <string name="confirm">Confirm</string>
 </resources>

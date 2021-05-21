@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_chart"
         android:title="@string/title_books" />
 
+    <item
+        android:id="@+id/navigation_gallery"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:title="@string/title_images" />
+
 </menu>
