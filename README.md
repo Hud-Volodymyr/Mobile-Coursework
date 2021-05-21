@@ -98,7 +98,6 @@ fun randomValue(maxValue: Int): Int {
 
 main();
 ```
-
 <p>
 <b>Висновок<b><br />
 </p>
