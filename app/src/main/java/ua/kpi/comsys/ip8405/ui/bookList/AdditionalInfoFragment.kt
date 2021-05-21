@@ -10,43 +10,46 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import com.squareup.picasso.Picasso
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 class AdditionalInfoFragment : Fragment(R.layout.additional_info_fragment) {
-    private val model: SharedViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val root = inflater.inflate(R.layout.additional_info_fragment, container, false) as ConstraintLayout
-        val bookId = model.isbn13.value
-        val book = bookId?.let { model.bookAdapter.value?.ds?.getBook(it) }
-        if (book != null) {
-            setBookProperties(root, book)
-        } else {
-            parentFragmentManager.popBackStack()
-        }
-        setReturnButtonListener(root)
-        return root
+        return inflater.inflate(R.layout.additional_info_fragment, container, false) as ConstraintLayout
+    }
+
+    @SuppressLint("SetTextI18n")
+    @ExperimentalSerializationApi
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val bookString = arguments?.getString(BOOK_BUNDLE) ?: error("No Book")
+        val book = Json.decodeFromString<Book>(bookString)
+        val layout = getView() as ConstraintLayout
+        layout.findViewById<TextView>(R.id.title_additional).text = "Title: ${book.title}"
+        layout.findViewById<TextView>(R.id.subtitle_additional).text = "Subtitle: ${book.subtitle}"
+        layout.findViewById<TextView>(R.id.description_additional).text = "Description: ${book.desc}"
+        layout.findViewById<TextView>(R.id.authors_additional).text = "Authors: ${book.authors}"
+        layout.findViewById<TextView>(R.id.publisher_additional).text = "Publisher: ${book.publisher}"
+        layout.findViewById<TextView>(R.id.pages_additional).text = "Pages: ${book.pages}"
+        layout.findViewById<TextView>(R.id.year_additional).text = "Year: ${book.year}"
+        layout.findViewById<TextView>(R.id.rating_additional).text = "Rating: ${book.rating} / 5"
+        Picasso.get()
+            .load(book.image)
+            .placeholder(R.drawable.ic_nocover)
+            .error(R.drawable.ic_nocover)
+            .into(layout.findViewById<ImageView>(R.id.image_additional))
+        setReturnButtonListener(layout)
     }
 
     @SuppressLint("SetTextI18n")
     private fun setBookProperties(root : ConstraintLayout, book: Book) {
-        root.findViewById<TextView>(R.id.title_additional).text = "Title: ${book.title}"
-        root.findViewById<TextView>(R.id.subtitle_additional).text = "Subtitle: ${book.subtitle}"
-        root.findViewById<TextView>(R.id.description_additional).text = "Description: ${book.desc}"
-        root.findViewById<TextView>(R.id.authors_additional).text = "Authors: ${book.authors}"
-        root.findViewById<TextView>(R.id.publisher_additional).text = "Publisher: ${book.publisher}"
-        root.findViewById<TextView>(R.id.pages_additional).text = "Pages: ${book.pages}"
-        root.findViewById<TextView>(R.id.year_additional).text = "Year: ${book.year}"
-        root.findViewById<TextView>(R.id.rating_additional).text = "Rating: ${book.rating} / 5"
-        val image = model.bookAdapter.value?.ds?.getImage(book)
-        root.findViewById<ImageView>(R.id.image_additional).setImageDrawable(
-            image?: ContextCompat.getDrawable(root.context, R.drawable.ic_nocover)
-        )
     }
 
     private fun setReturnButtonListener(root : ConstraintLayout) {
@@ -54,5 +57,9 @@ class AdditionalInfoFragment : Fragment(R.layout.additional_info_fragment) {
         backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+    }
+
+    companion object {
+        const val BOOK_BUNDLE = "BOOK_BUNDLE"
     }
 }

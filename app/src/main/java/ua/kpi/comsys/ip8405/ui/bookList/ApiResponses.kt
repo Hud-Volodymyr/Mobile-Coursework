@@ -4,13 +4,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class Book(
+internal data class BookResponse(
+    @SerialName("error")
+    val error: String? = null,
+
     @SerialName("title")
     val title: String,
 
     @SerialName("subtitle")
     val subtitle: String,
 
+    @SerialName("isbn13")
     val isbn13: String,
 
     @SerialName("price")
@@ -38,5 +42,19 @@ internal data class Book(
     val publisher: String = "No publisher info",
 
     @SerialName("url")
-    val url: String = "No url"
+    val url: String
 )
+
+internal fun BookResponse.bookSerialize() : Book {
+    return Book(title, subtitle, isbn13, price, year, image, desc, authors, pages, rating, publisher, url)
+}
+
+@Serializable
+internal data class BooksResponse(
+    @SerialName("books")
+    val books: List<Book>? = null,
+)
+
+internal fun BooksResponse.booksSerialize() : List<Book> {
+    return books!!
+}

@@ -34,7 +34,7 @@ A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
 <img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab5/images/gallery_images_scrolled.jpg?raw=true"/>
 <img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab5/images/gallery_images_bottom.jpg?raw=true"/>
 </p>
-  
+
 ----------------------------------------------------------------------------------------------------------------
 
 <p>
@@ -105,7 +105,6 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
         }
     }
 ```
-
 <p>
 <b>Висновок<b><br />
 </p>
