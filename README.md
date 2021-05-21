@@ -23,7 +23,7 @@ A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
 ----------------------------------------------------------------------------------------------------------------
 
 <p align="center">
-  Варіант = 05 mod 6 + 1 = 6 
+  Варіант = 05 mod 2 + 1 = 2 
 </p>
 
 ----------------------------------------------------------------------------------------------------------------
@@ -89,6 +89,7 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
         retainInstance = true
         galleryViewModel = ViewModelProvider(requireActivity()).get(GalleryViewModel::class.java)
         return inflater.inflate(R.layout.gallery_fragment, container, false)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
