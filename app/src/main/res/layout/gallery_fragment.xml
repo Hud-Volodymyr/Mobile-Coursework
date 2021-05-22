@@ -9,7 +9,7 @@
         android:id="@+id/progress_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageCreatorButton"
+        app:layout_constraintTop_toTopOf="@id/galleryRecyclerView"
         android:visibility="gone"
         tools:visibility="visible"
         tools:progress="20"
@@ -17,24 +17,24 @@
         android:layout_width="match_parent"
         android:layout_height="20dp"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/galleryRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageCreatorButton"
-        app:layout_constraintVertical_bias="0.0" />
-    <ImageButton
+    <!-- <ImageButton
         android:id="@+id/imageCreatorButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layoutDirection="inherit"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_input_add"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints" /> -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/galleryRecyclerView"
+        app:layout_constraintTop_toBottomOf="@id/progress_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
     <TextView
         android:id="@+id/not_found"
         android:layout_width="wrap_content"

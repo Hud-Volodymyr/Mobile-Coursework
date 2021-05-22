@@ -3,6 +3,7 @@ package ua.kpi.comsys.ip8405.ui.gallery
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.Ok
 import com.squareup.picasso.Picasso
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.launch
@@ -10,11 +11,11 @@ import kotlinx.serialization.ExperimentalSerializationApi
 
 class GalleryViewModel : ViewModel() {
     internal val galleryAdapter = MutableLiveData<GalleryAdapter?>()
-    private val dataSource = ImageDataSource("19193969-87191e5db266905fe8936d565")
+    internal var dataSourcePicker : SourcePicker? = null
     private val request = "red+cars"
     private val count = 21
     val picasso = Picasso.get()
-    val state = MutableLiveData(false)
+    val state = MutableLiveData(listOf(false, false))
     val imageList = MutableLiveData<Result<ImageGallery, Exception>>()
 
     internal fun setGalleryAdapter(newAdapter: GalleryAdapter?) {
@@ -23,13 +24,18 @@ class GalleryViewModel : ViewModel() {
 
     @ExperimentalSerializationApi
     fun provideImages() {
-        if (state.value == true) return
+        if (state.value?.first() == true && state.value?.last() == true) return
 
-        state.value = true
+        state.value = listOf(true, true)
 
         viewModelScope.launch {
-            imageList.postValue(dataSource.getImages(request, count))
-            state.postValue(false)
+            val image = dataSourcePicker?.getImages(request, count)!!
+            if (image is Ok) {
+                imageList.postValue(image)
+                state.postValue(listOf(false, false))
+            } else {
+                state.postValue(listOf(false, true))
+            }
         }
     }
 }
