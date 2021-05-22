@@ -2,15 +2,13 @@ package ua.kpi.comsys.ip8405.ui.gallery
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -30,12 +28,12 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
         galleryViewModel.setGalleryAdapter(context?.let { GalleryAdapter(handler = galleryViewModel.picasso) })
     }
 
-    private fun addFloatingImageActionClickListener(root: View) {
+    /*private fun addFloatingImageActionClickListener(root: View) {
         val addImageButton = root.findViewById<ImageButton>(R.id.imageCreatorButton)
         addImageButton.setOnClickListener {
             chooseImageGallery()
         }
-    }
+    }*/
 
     private fun chooseImageGallery() {
         val intent = Intent(Intent.ACTION_PICK)
@@ -47,6 +45,7 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == 1) {
             galleryViewModel.galleryAdapter.value?.addImage(Image(data?.data.toString()))
+            Log.d("IMAGEADD", "Got it")
         }
     }
 
@@ -60,6 +59,9 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
     @ExperimentalSerializationApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (galleryViewModel.dataSourcePicker == null) {
+            galleryViewModel.dataSourcePicker = initializePicker("19193969-87191e5db266905fe8936d565", requireActivity().applicationContext)
+        }
         val root = getView()
         val recyclerView = root?.findViewById<RecyclerView>(R.id.galleryRecyclerView)
         progressBar = view.findViewById(R.id.progress_bar)!!
@@ -69,14 +71,14 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
             createGalleryAdapter()
         }
         recyclerView?.adapter = galleryViewModel.galleryAdapter.value
-        if (root != null) {
+        /*if (root != null) {
             addFloatingImageActionClickListener(root)
-        }
+        }*/
 
         progressBar.isIndeterminate = true
         galleryViewModel.state.observe(viewLifecycleOwner) {
-            progressBar.isVisible = it
-            noItemsFound.isVisible = it
+            progressBar.isVisible = it.first()
+            noItemsFound.isVisible = it.last()
         }
 
         galleryViewModel.imageList.observe(viewLifecycleOwner) {
@@ -86,6 +88,7 @@ class GalleryFragment: Fragment(R.layout.gallery_fragment) {
                 noItemsFound.text = error.message
             }
         }
+
 
         if (galleryViewModel.imageList.value !is Ok) {
             galleryViewModel.provideImages()

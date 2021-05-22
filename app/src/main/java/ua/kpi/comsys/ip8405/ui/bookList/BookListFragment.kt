@@ -30,7 +30,7 @@ class SharedViewModel : ViewModel() {
     internal val bookAdapter = MutableLiveData<BookAdapter?>()
     val isbn13 = MutableLiveData<String>()
     val parentFragmentManager = MutableLiveData<FragmentManager?>()
-    private val datasource = BooksDataSource()
+    internal var datasourcePicker: SourcePicker? = null
     val state = MutableLiveData(false)
     internal val book = MutableLiveData<Result<Book, Exception>>()
     internal val books = MutableLiveData<Result<List<Book>, Exception>>()
@@ -56,7 +56,7 @@ class SharedViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            books.postValue(datasource.getBooks(request))
+            books.postValue(datasourcePicker?.getBooks(request))
             state.value = false
         }
     }
@@ -67,7 +67,7 @@ class SharedViewModel : ViewModel() {
         state.postValue(true)
 
         viewModelScope.launch {
-            book.postValue(datasource.getBook(isbn13))
+            book.postValue(datasourcePicker?.getBook(isbn13))
             state.postValue(false)
         }
     }
@@ -95,6 +95,9 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
     @ExperimentalSerializationApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (model.datasourcePicker == null) {
+            model.datasourcePicker = initializePicker(requireActivity().applicationContext)
+        }
         val recyclerView = getView()?.findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView?.layoutManager = LinearLayoutManager(this.context)
         noItemsFound = view.findViewById(R.id.not_found)!!
@@ -131,9 +134,14 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
         }
         model.books.observe(viewLifecycleOwner) {
             it.onSuccess { books ->
-                recyclerView?.isVisible = true
-                noItemsFound.isVisible = false
-                model.bookAdapter.value!!.update(books)
+                recyclerView?.isVisible = false
+                noItemsFound.isVisible = true
+                noItemsFound.text = "Nothing found"
+                if (books.isNotEmpty()) {
+                    recyclerView?.isVisible = true
+                    noItemsFound.isVisible = false
+                    model.bookAdapter.value!!.update(books)
+                }
             }
             it.onFailure { error ->
                 recyclerView?.isVisible = false
@@ -143,6 +151,7 @@ class BookListFragment : Fragment(R.layout.book_list_fragment) {
         }
     }
 
+    @ExperimentalSerializationApi
     private fun addSearchListener(root: View) {
         val searchView = root.findViewById<SearchView>(R.id.searchBook)
         val queryTextListener = object : SearchView.OnQueryTextListener {
