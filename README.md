@@ -9,7 +9,7 @@ A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
 “КИЇВСЬКИЙ ПОЛІТЕХНІЧНИЙ ІНСТИТУТ ІМЕНІ ІГОРЯ СІКОРСЬКОГО”<br />
 Факультет інформатики та обчислювальної техніки<br />
 Кафедра обчислювальної техніки<br />
-Лабораторна робота №4<br />
+Лабораторна робота №7<br />
 з дисципліни<br />
 “Розроблення клієнтських додатків для мобільних платформ”<br />
 </p>
@@ -23,153 +23,128 @@ A coursework for mobile developement in Kyiv Politechnical Institute. 3rd-year.
 ----------------------------------------------------------------------------------------------------------------
 
 <p align="center">
-  Варіант = 05 mod 6 + 1 = 6 
+  Варіант = 05 mod 2 + 1 = 2 
 </p>
 
 ----------------------------------------------------------------------------------------------------------------
 
 <p align="center">
 <b>Приклад роботи додатка<b><br />
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/boos_vertical_endOfList.jpgraw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_vertical.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_not_found.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_info_vertical.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_info_horizontal.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_horizontal_endOfList.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_horizontal.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_create_vertical.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/books_create_horizontal.jpg?raw=true"/>
-<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab4/images/book_search.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab7/images/no_internet_books.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab7/images/internet_search_books.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab7/images/no_internet_books_saved.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab7/images/no_internet_images.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab7/images/internet_images.jpg?raw=true"/>
+<img src="https://github.com/Hud-Volodymyr/Mobile-Coursework/blob/lab7/images/no_internet_images_cached.jpg?raw=true"/>
 </p>
   
 ----------------------------------------------------------------------------------------------------------------
 
 <p>
-<b>Приклад коду списку книг<b><br />
+<b>Приклад коду галереї<b><br />
 </p>
   
 ``` kotlin
-package ua.kpi.comsys.ip8405.ui.bookList
+package ua.kpi.comsys.ip8405.ui.gallery
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.SearchView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.commit
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import ua.kpi.comsys.ip8405.R
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
+import kotlinx.serialization.ExperimentalSerializationApi
+import ua.kpi.comsys.ip8405.R
 
-class SharedViewModel : ViewModel() {
-    internal val bookAdapter = MutableLiveData<BookAdapter?>()
-    val isbn13 = MutableLiveData<String>()
-    val parentFragmentManager = MutableLiveData<FragmentManager?>()
-
-    internal fun setBookAdapter(newAdapter: BookAdapter?) {
-        bookAdapter.value = newAdapter
-    }
-
-    fun onBookClicked(newIsbn13 : String) {
-        isbn13.value = newIsbn13
-    }
-
-    fun setFragmentManager(fragmentManager: FragmentManager) {
-        parentFragmentManager.value = fragmentManager
-    }
-}
-
-
-class BookListFragment : Fragment(R.layout.book_list_fragment) {
-    private val model: SharedViewModel by activityViewModels()
+class GalleryFragment: Fragment(R.layout.gallery_fragment) {
+    private lateinit var galleryViewModel: GalleryViewModel
+    private lateinit var progressBar: ProgressBar
     private lateinit var noItemsFound: TextView
-    internal var booksList : ArrayList<Book>? = null
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
-        retainInstance = true
-        if (model.parentFragmentManager.value == null) model.setFragmentManager(parentFragmentManager)
-        return inflater.inflate(R.layout.book_list_fragment, container, false)
+    private fun createGalleryAdapter() {
+        galleryViewModel.setGalleryAdapter(context?.let { GalleryAdapter(handler = galleryViewModel.picasso) })
     }
 
+    /*private fun addFloatingImageActionClickListener(root: View) {
+        val addImageButton = root.findViewById<ImageButton>(R.id.imageCreatorButton)
+        addImageButton.setOnClickListener {
+            chooseImageGallery()
+        }
+    }*/
+
+    private fun chooseImageGallery() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, 1)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == 1) {
+            galleryViewModel.galleryAdapter.value?.addImage(Image(data?.data.toString()))
+            Log.d("IMAGEADD", "Got it")
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) : View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+        retainInstance = true
+        galleryViewModel = ViewModelProvider(requireActivity()).get(GalleryViewModel::class.java)
+        return inflater.inflate(R.layout.gallery_fragment, container, false)
+    }
+
+    @ExperimentalSerializationApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val recyclerView = getView()?.findViewById<RecyclerView>(R.id.recyclerView)
-        recyclerView?.layoutManager = LinearLayoutManager(this.context)
-        if (model.bookAdapter.value == null) {
-            val bookList = BooksDataSource(requireActivity().assets)
-            val clickListener = BookAdapter.BookClickListener { isbn13: String ->
-                activity?.supportFragmentManager?.commit {
-                    model.onBookClicked(isbn13)
-                    replace(R.id.nav_host_fragment, AdditionalInfoFragment())
-                    addToBackStack(null)
-                } }
-            model.setBookAdapter(context?.let { BookAdapter(bookList, clickListener) })
+        if (galleryViewModel.dataSourcePicker == null) {
+            galleryViewModel.dataSourcePicker = initializePicker("19193969-87191e5db266905fe8936d565", requireActivity().applicationContext)
         }
-        recyclerView?.adapter = model.bookAdapter.value
-        booksList = model.bookAdapter.value?.books
+        val root = getView()
+        val recyclerView = root?.findViewById<RecyclerView>(R.id.galleryRecyclerView)
+        progressBar = view.findViewById(R.id.progress_bar)!!
         noItemsFound = view.findViewById(R.id.not_found)!!
-        noItemsFound.isVisible = false
-        val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val adapter = recyclerView?.adapter as BookAdapter
-                val position = viewHolder.adapterPosition
-                val item = adapter.books[position]
-                adapter.removeBook(position)
-                booksList?.remove(item)
-            }
+        recyclerView?.layoutManager = GalleryLayoutManager()
+        if (galleryViewModel.galleryAdapter.value == null) {
+            createGalleryAdapter()
         }
-        val itemTouchHelper = ItemTouchHelper(swipeHandler)
-        itemTouchHelper.attachToRecyclerView(recyclerView)
-        addFloatingBookActionClickListener(view)
-        addSearchListener(view)
-    }
+        recyclerView?.adapter = galleryViewModel.galleryAdapter.value
+        /*if (root != null) {
+            addFloatingImageActionClickListener(root)
+        }*/
 
-    private fun addFloatingBookActionClickListener(root: View) {
-        val addBookButton = root.findViewById<ImageButton>(R.id.book_creator_button)
-        addBookButton.setOnClickListener {
-            parentFragmentManager.commit {
-                replace(R.id.nav_host_fragment, AddBookFragment())
-                addToBackStack(null)
-            }
+        progressBar.isIndeterminate = true
+        galleryViewModel.state.observe(viewLifecycleOwner) {
+            progressBar.isVisible = it.first()
+            noItemsFound.isVisible = it.last()
         }
-    }
 
-    private fun addSearchListener(root: View) {
-        val searchView = root.findViewById<SearchView>(R.id.searchBook)
-        val queryTextListener = object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return true
-            }
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (booksList?.isEmpty() == true) return true
-                if (newText != null) {
-                    val filteredBookList = booksList?.filter { book -> book.title.toLowerCase().contains(newText.toLowerCase()) } as ArrayList<Book>
-                    model.bookAdapter.value?.books = filteredBookList
-                    model.bookAdapter.value?.notifyDataSetChanged()
-                    noItemsFound.isVisible = filteredBookList.size == 0
-                }
-                return true
+        galleryViewModel.imageList.observe(viewLifecycleOwner) {
+            it.onSuccess { gallery ->
+                galleryViewModel.galleryAdapter.value?.update(gallery)
+            }.onFailure { error ->
+                noItemsFound.text = error.message
             }
         }
-        searchView.setOnQueryTextListener(queryTextListener)
+
+
+        if (galleryViewModel.imageList.value !is Ok) {
+            galleryViewModel.provideImages()
+        }
     }
-}
 ```
 
 <p>
 <b>Висновок<b><br />
 </p>
 
-В даній лабораторній роботі ми навчилися додавати функціонал до існуючого, а також працювати з створенням, видаленням та пошуком сутностей на платформі Android.
+В даній лабораторній роботі ми навчилися працювати з різними джерелави даних одночасно, а також ознайомилися з технологією збереження даних на платформі андоїд SQLite.
