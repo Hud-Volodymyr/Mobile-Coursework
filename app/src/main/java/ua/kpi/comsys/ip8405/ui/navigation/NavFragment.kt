@@ -12,8 +12,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import ua.kpi.comsys.ip8405.MainFragment
 import ua.kpi.comsys.ip8405.R
 import ua.kpi.comsys.ip8405.ui.bookList.BookListFragment
-import ua.kpi.comsys.ip8405.ui.chart.ChartFragment
-import ua.kpi.comsys.ip8405.ui.gallery.GalleryFragment
 import ua.kpi.comsys.ip8405.ui.home.HomeFragment
 
 class NavFragment : MainFragment() {
@@ -33,9 +31,7 @@ class NavFragment : MainFragment() {
         val navigationView = view?.findViewById<BottomNavigationView>(R.id.navigation_view)
         navigationView?.selectedItemId = when (viewModel.state.value) {
             NavViewModel.State.Home -> R.id.navigation_home
-            NavViewModel.State.Charts -> R.id.navigation_charts
             NavViewModel.State.Books -> R.id.navigation_books
-            NavViewModel.State.Gallery -> R.id.navigation_gallery
             else -> error("Navigating to inexistant fragment")
         }
     }
@@ -46,14 +42,12 @@ class NavFragment : MainFragment() {
         val navPager = view.findViewById<ViewPager2>(R.id.nav_pager)
 
         navPager.adapter = object : FragmentStateAdapter(this) {
-            override fun getItemCount(): Int = 4
+            override fun getItemCount(): Int = 2
 
             override fun createFragment(position: Int): Fragment = when (position) {
                 0 -> HomeFragment()
-                1 -> ChartFragment()
-                2 -> BookListFragment()
-                3 -> GalleryFragment()
-                else -> error("Navigating to inexistant fragment")
+                1 -> BookListFragment()
+                else -> error("Navigating to inexistant fragment: $position")
             }
         }
         val navView = view.findViewById<BottomNavigationView>(R.id.navigation_view)
@@ -63,10 +57,8 @@ class NavFragment : MainFragment() {
                 super.onPageSelected(position)
                 navView.selectedItemId = when (position) {
                     0 -> R.id.navigation_home
-                    1 -> R.id.navigation_charts
-                    2 -> R.id.navigation_books
-                    3 -> R.id.navigation_gallery
-                    else -> error("Navigating to inexistant fragment")
+                    1 -> R.id.navigation_books
+                    else -> error("Navigating to inexistant fragment: $position")
                 }
             }
         })
@@ -74,9 +66,7 @@ class NavFragment : MainFragment() {
         viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
                 NavViewModel.State.Home -> navPager.currentItem = 0
-                NavViewModel.State.Charts -> navPager.currentItem = 1
-                NavViewModel.State.Books -> navPager.currentItem = 2
-                NavViewModel.State.Gallery -> navPager.currentItem = 3
+                NavViewModel.State.Books -> navPager.currentItem = 1
                 else -> error("Navigating to inexistant fragment: $it")
             }
         }
@@ -84,9 +74,7 @@ class NavFragment : MainFragment() {
         navView.setOnNavigationItemSelectedListener {
             viewModel.state.value = when (it.itemId) {
                 R.id.navigation_home -> NavViewModel.State.Home
-                R.id.navigation_charts -> NavViewModel.State.Charts
                 R.id.navigation_books -> NavViewModel.State.Books
-                R.id.navigation_gallery -> NavViewModel.State.Gallery
                 else -> error("Navigating to inexistant fragment: ${it.itemId}")
             }
             true

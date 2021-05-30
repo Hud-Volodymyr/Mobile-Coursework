@@ -7,6 +7,6 @@ class NavViewModel : ViewModel() {
     val state = MutableLiveData(State.Home)
 
     enum class State {
-        Home, Charts, Books, Gallery
+        Home, Books
     }
 }

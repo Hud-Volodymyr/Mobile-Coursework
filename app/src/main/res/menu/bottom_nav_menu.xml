@@ -5,20 +5,9 @@
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_home_black_24dp"
         android:title="@string/title_home" />
-
-    <item
-        android:id="@+id/navigation_charts"
-        android:icon="@drawable/ic_chart"
-        android:title="@string/title_charts" />
-
     <item
         android:id="@+id/navigation_books"
         android:icon="@drawable/ic_chart"
         android:title="@string/title_books" />
-
-    <item
-        android:id="@+id/navigation_gallery"
-        android:icon="@android:drawable/ic_menu_gallery"
-        android:title="@string/title_images" />
 
 </menu>
